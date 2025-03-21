@@ -25,10 +25,44 @@
 
  typedef unsigned int word;
 
- word __at 0x2007 __CONFIG =
+ word __at 0x2007 __CONFIG = (_WDT_OFF & _MCLRE_OFF & _BOREN_OFF);
+
+ #define BTN GP3;
+
+ void dice ();
+
+ void delay (unsigned int tiempo);
 
 int main(int argc, char **argv)
 {
+	dice ();
 	
 	return 0;
+}
+
+void dice () {
+
+	TRISIO |= (0b001000); // PIN P3 - input
+	GPIO &= (0b000000); // Pines en bajo
+	// ANSEL
+	// CMCON
+	// CONFIG
+
+	unsigned int time = 100;
+
+	while ( 1 ){
+
+	}
+
+}
+
+void delay (unsigned int tiempo){
+	
+	unsigned int i;
+	unsigned int j;
+
+	for(i=0; i<tiempo; i++){
+		for(j=0; j<1275; j++){	
+		}
+	}
 }
