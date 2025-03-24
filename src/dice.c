@@ -27,33 +27,80 @@
 
  word __at 0x2007 __CONFIG = (_WDT_OFF & _MCLRE_OFF & _BOREN_OFF);
 
- #define BTN GP3;
+ #define BTN GP3
 
  void dice ();
 
  void delay (unsigned int tiempo);
 
-int main(int argc, char **argv)
+void main(void)
 {
 	dice ();
 	
-	return 0;
 }
 
 void dice () {
 
-	TRISIO |= (0b001000); // PIN P3 - input
-	GPIO &= (0b000000); // Pines en bajo
-	// ANSEL
-	// CMCON
+	GPIO	= 0b000000; // Pines en bajo
+	TRISIO	= 0b001000; // PIN P3 - input
+	ANSEL	= 0b0000000;
+	//CMCON0	= ;
+	//CMCON1 	= ;
+	//VRCON
 	// CONFIG
 
 	unsigned int time = 100;
+	unsigned int seed = 0;
 
+	// Loop forever
 	while ( 1 ){
 
-	}
+		//GPIO = 0b0000001;
+		//GPIO = 0b1111110;
+		//GP0 = 1;
+		//GP1 = 0;
+		//GP2 = 0;
+		//GP4 = 0;
 
+		/*
+		seed = seed + 1:
+
+		if (BTN == 1){
+
+			if (seed == 1){
+
+			}
+			
+			if (seed == 2){
+
+			}
+
+			if (seed == 3){
+
+			}
+
+			if (seed == 4){
+
+			}
+
+			if (seed == 5){
+
+			}
+
+			if (seed == 6){
+
+			}
+
+		}
+
+		if (seed == 6){
+			
+			seed = 0; // reinicio del contador
+
+		}
+		*/
+	}
+		
 }
 
 void delay (unsigned int tiempo){
