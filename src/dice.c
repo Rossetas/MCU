@@ -61,34 +61,77 @@ void dice () {
 		//GP1 = 0;
 		//GP2 = 0;
 		//GP4 = 0;
+		
+		
+		//GPIO = 0b011111;
+		
+		//delay(time);
+		
+		//GPIO = 0b001000;
+		
+		//delay(time);
+		
+		// /*
+		seed = seed + 1;
 
-		/*
-		seed = seed + 1:
+		if (BTN != 1){
+			GPIO = 0b001000;
+		}
 
 		if (BTN == 1){
 
 			if (seed == 1){
-
+				GPIO = 0b001001;
+				delay(1000);
+				GPIO = 0b001000;
+				delay(1000);
+				seed = 0;
+				continue;
 			}
 			
 			if (seed == 2){
-
+				GPIO = 0b001010;
+				delay(1000);
+				GPIO = 0b001000;
+				delay(1000);
+				seed = 0;
+				continue;
 			}
 
 			if (seed == 3){
-
+				GPIO = 0b001011;
+				delay(1000);
+				GPIO = 0b001000;
+				delay(1000);
+				seed = 0;
+				continue;
 			}
 
 			if (seed == 4){
-
+				GPIO = 0b001110;
+				delay(1000);
+				GPIO = 0b001000;
+				delay(1000);
+				seed = 0;
+				continue;
 			}
 
 			if (seed == 5){
-
+				GPIO = 0b001111;
+				delay(1000);
+				GPIO = 0b001000;
+				delay(1000);
+				seed = 0;
+				continue;
 			}
 
 			if (seed == 6){
-
+				GPIO = 0b011110;
+				delay(1000);
+				GPIO = 0b001000;
+				delay(1000);
+				seed = 0;
+				continue;
 			}
 
 		}
@@ -98,7 +141,7 @@ void dice () {
 			seed = 0; // reinicio del contador
 
 		}
-		*/
+		// */
 	}
 		
 }
