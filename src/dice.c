@@ -25,7 +25,7 @@
 
  typedef unsigned int word;
 
- word __at 0x2007 __CONFIG = (_WDT_OFF & _MCLRE_OFF & _BOREN_OFF);
+ word __at 0x2007 __CONFIG = (_WDT_OFF & _MCLRE_OFF & _BOREN_OFF); // CONFIG
 
  #define BTN GP3
 
@@ -41,109 +41,89 @@ void main(void)
 
 void dice () {
 
-	GPIO	= 0b000000; // Pines en bajo
-	TRISIO	= 0b001000; // PIN P3 - input
-	ANSEL	= 0b0000000;
-	//CMCON0	= ;
-	//CMCON1 	= ;
-	//VRCON
-	// CONFIG
+	GPIO	= 0b00000000; 	// Pines en bajo
+	TRISIO	= 0b00001000; 	// PIN P3 - input
+	ANSEL	= 0b00000000;	// Puertos como digitales
+	CMCON0	= 0b00000111; 	// 111 = CIN pins are configured as I/O, COUT pin is configured as I/O, Comparator output disabled, Comparator off.
 
-	unsigned int time = 100;
+	unsigned int timeON = 1000, timeOFF = 100;
 	unsigned int seed = 0;
 
 	// Loop forever
 	while ( 1 ){
-
-		//GPIO = 0b0000001;
-		//GPIO = 0b1111110;
-		//GP0 = 1;
-		//GP1 = 0;
-		//GP2 = 0;
-		//GP4 = 0;
 		
-		
-		//GPIO = 0b011111;
-		
-		//delay(time);
-		
-		//GPIO = 0b001000;
-		
-		//delay(time);
-		
-		// /*
 		seed = seed + 1;
 
 		if (BTN != 1){
-			GPIO = 0b001000;
+
+			GPIO = 0b000000;
+
 		}
 
 		if (BTN == 1){
 
 			if (seed == 1){
-				GPIO = 0b001001;
-				delay(1000);
-				GPIO = 0b001000;
-				delay(1000);
+				GPIO = 0b000001;
+				delay(timeON);
+				GPIO = 0b000000;
+				delay(timeOFF);
 				seed = 0;
 				continue;
 			}
 			
 			if (seed == 2){
-				GPIO = 0b001010;
-				delay(1000);
-				GPIO = 0b001000;
-				delay(1000);
+				GPIO = 0b000010;
+				delay(timeON);
+				GPIO = 0b000000;
+				delay(timeOFF);
 				seed = 0;
 				continue;
 			}
 
 			if (seed == 3){
-				GPIO = 0b001011;
-				delay(1000);
-				GPIO = 0b001000;
-				delay(1000);
+				GPIO = 0b000011;
+				delay(timeON);
+				GPIO = 0b000000;
+				delay(timeOFF);
 				seed = 0;
 				continue;
 			}
 
 			if (seed == 4){
-				GPIO = 0b001110;
-				delay(1000);
-				GPIO = 0b001000;
-				delay(1000);
+				GPIO = 0b000110;
+				delay(timeON);
+				GPIO = 0b000000;
+				delay(timeOFF);
 				seed = 0;
 				continue;
 			}
 
 			if (seed == 5){
-				GPIO = 0b001111;
-				delay(1000);
-				GPIO = 0b001000;
-				delay(1000);
+				GPIO = 0b000111;
+				delay(timeON);
+				GPIO = 0b000000;
+				delay(timeOFF);
 				seed = 0;
 				continue;
 			}
 
 			if (seed == 6){
-				GPIO = 0b011110;
-				delay(1000);
-				GPIO = 0b001000;
-				delay(1000);
+				GPIO = 0b010110;
+				delay(timeON);
+				GPIO = 0b000000;
+				delay(timeOFF);
 				seed = 0;
 				continue;
 			}
-
 		}
 
 		if (seed == 6){
-			
-			seed = 0; // reinicio del contador
 
+			seed = 0; // reinicio del contador
+			continue;
+			
 		}
-		// */
-	}
-		
+	}	
 }
 
 void delay (unsigned int tiempo){
