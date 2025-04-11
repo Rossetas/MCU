@@ -21,7 +21,6 @@
  * 
  */
 
-
 #include <avr/io.h>
 #include <avr/interrupt.h>  // Interrupts
 //#include <util/delay.h>
@@ -29,7 +28,22 @@
 /* function prototype */
 void traffic_light();
 void FSM();
-void delay(unsigned int);
+void start_delay(uint16_t);
+/* ********** */
+
+/* global variables */
+volatile uint8_t request = 0;
+unsigned int state = 0, next_state = 0;
+volatile uint8_t en_delay = 0;
+volatile uint16_t times = 0;
+volatile uint16_t target_times = 0;
+volatile uint8_t delay_done = 0;
+/* ********** */
+
+/* states FSM */
+#define paso_vehiculos  0
+#define waiting         1
+#define paso_peatones   2
 /* ********** */
 
 int main(void)
@@ -44,21 +58,25 @@ void traffic_light(){
 
   // config ports
   DDRB = 0xF9;  // pins B
-  DDRA = 0x03;   // pins A
+  DDRA = 0x03;  // pins A
 
   // https://www.nongnu.org/avr-libc/user-manual/group__avr__interrupts.html
 
   // interruptions
   GIMSK |= (1 << PCIE0); // //Se habilita la interrupcion por PCIE0
+  //PCMSK |= 0x06; // PB1 - PB2 as irq buttons
   PCMSK0 |= 0x06; // PB1 - PB2 as irq buttons
 
   // timers
   TCCR0A |= 0x00; // Mode: normal
   TCCR0B |= 0x04; // 256 (From prescaler)
   TCNT0 = 0x00;   // Inicializa el contador del Timer 0 a 0
-  TIMSK0 |= (1 << TOIE0); // Habilita la interrupción por desbordamiento del Timer0
 
-  sei(); // enable irq global 
+  //TIMSK0 |= (1 << TOIE0); // Habilita la interrupción por desbordamiento del Timer0
+
+  sei(); // enable irq global
+  
+  next_state = paso_vehiculos;
 
   while ( 1 ){
 
@@ -70,13 +88,45 @@ void traffic_light(){
 
 void FSM(){
 
+  state = next_state;
+
+  switch(state){
+
+    case paso_vehiculos:
+    break;
+
+    case waiting:
+    break;
+
+    case paso_peatones:
+    break;
+
+    default:
+            next_state = paso_vehiculos;
+    break;
+
+  }
+
 }
 
-void delay(unsigned int overflows){
+void start_delay(uint16_t overflows) {
+
+  en_delay = 1;
+  delay_done = 0;
+  times = 0;
+  target_times = overflows;
+  TIMSK |= (1 << TOIE0); // Habilitar interrupción por overflow
 
 }
 
 ISR(PCINT0_vect) {
+
+  if ((PINB & (1 << PB1)) || (PINB & (1 << PB2))){
+    request = 1;
+    PCMSK &= ~((1 << PCINT1) | (1 << PCINT2)); // // Se desactiva la interrupción para evitar múltiples activaciones
+  }
+
+  /*
   // Aquí puedes manejar la interrupción de PB1 o PB2
   // Para determinar cuál de los botones fue presionado, puedes leer el estado de los pines
   if (PINB & (1 << PB1)) {
@@ -86,15 +136,22 @@ ISR(PCINT0_vect) {
   if (PINB & (1 << PB2)) {
       // Si PB2 está presionado, realiza lo que necesites para ese botón
   }
-}
-
-ISR(TIMER0_OVF_vect){
+  */
 
 }
 
+ISR(TIMER0_OVF_vect) {
 
+  if (en_delay) {
+    times++;
+    if (times >= target_times) {
+      en_delay = 0;
+      delay_done = 1;
+      TIMSK &= ~(1 << TOIE0); // Desactivar solo la interrupción TOIE0
+    }
+  }
 
-
+}
 
 /*
 #include <avr/io.h>
