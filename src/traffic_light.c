@@ -64,8 +64,8 @@ void traffic_light(){
 
   // interruptions
   GIMSK |= (1 << PCIE0); // //Se habilita la interrupcion por PCIE0
-  //PCMSK |= 0x06; // PB1 - PB2 as irq buttons
-  PCMSK0 |= 0x06; // PB1 - PB2 as irq buttons
+  PCMSK |= 0x06; // PB1 - PB2 as irq buttons
+  //PCMSK0 |= 0x06; // PB1 - PB2 as irq buttons
 
   // timers
   TCCR0A |= 0x00; // Mode: normal
@@ -93,16 +93,52 @@ void FSM(){
   switch(state){
 
     case paso_vehiculos:
+        // Vehículos en verde
+        PORTB = (1 << PB5) | (1 << PB6);  // Verde vehículo + Rojo peatones izquierdos
+        PORTA = (1 << PA0);               // Rojo peatones derechos
+        start_delay(312);                // 10 segundos = 312 overflows @8MHz, prescaler 256
+
+        while (!delay_done); // Espera con interrupciones
+
+        if (request) {
+          request = 0;
+          next_state = waiting;
+        } else {
+          next_state = paso_vehiculos;
+        }
+
     break;
 
     case waiting:
+        // Vehículos en amarillo
+        PORTB = (1 << PB4) | (1 << PB6);  // Amarillo vehículo + Rojo peatones izquierdos
+        PORTA = (1 << PA0);               // Rojo peatones derechos
+        start_delay(94);                 // 3 segundos = 94 overflows
+
+        while (!delay_done);
+
+        next_state = paso_peatones;
+
     break;
 
     case paso_peatones:
+        // Peatones en verde
+        PORTB = (1 << PB3);              // Rojo vehículo
+        PORTB |= (1 << PB7);             // Verde peatones izquierdos
+        PORTA = (1 << PA1);              // Verde peatones derechos
+        start_delay(312);               // 10 segundos
+
+        while (!delay_done);
+
+        // Después del paso peatonal
+        next_state = paso_vehiculos;
+        PCMSK |= (1 << PCINT1) | (1 << PCINT2);  // Reactivar interrupciones
+
     break;
 
     default:
-            next_state = paso_vehiculos;
+        next_state = paso_vehiculos;
+
     break;
 
   }
