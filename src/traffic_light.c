@@ -23,7 +23,6 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>  // Interrupts
-//#include <util/delay.h>
 
 /* function prototype */
 void traffic_light();
@@ -53,26 +52,18 @@ int main(void)
 
 void traffic_light(){
 
-  // Registers Config
-  //SREG = 0x;
-
   // config ports
   DDRB = 0xF9;  // pins B
   DDRA = 0x03;  // pins A
 
-  // https://www.nongnu.org/avr-libc/user-manual/group__avr__interrupts.html
-
   // interruptions
-  GIMSK |= (1 << PCIE0); // //Se habilita la interrupcion por PCIE0
-  PCMSK |= 0x06; // PB1 - PB2 as irq buttons
-  //PCMSK0 |= 0x06; // PB1 - PB2 as irq buttons
+  GIMSK |= (1 << PCIE0);  // Se habilita la interrupcion por PCIE0
+  PCMSK |= 0x06;          // PB1 - PB2 as irq buttons
 
   // timers
   TCCR0A |= 0x00; // Mode: normal
   TCCR0B |= 0x04; // 256 (From prescaler)
   TCNT0 = 0x00;   // Inicializa el contador del Timer 0 a 0
-
-  //TIMSK0 |= (1 << TOIE0); // Habilita la interrupción por desbordamiento del Timer0
 
   sei(); // enable irq global
   
@@ -83,7 +74,6 @@ void traffic_light(){
     FSM();
 
   }
-
 }
 
 void FSM(){
@@ -93,10 +83,10 @@ void FSM(){
   switch(state){
 
     case paso_vehiculos:
-        // Vehículos en verde
-        PORTB = (1 << PB5) | (1 << PB6);  // Verde vehículo + Rojo peatones izquierdos
+        // vehiculos en verde
+        PORTB = (1 << PB5) | (1 << PB6);  // Verde vehiculo + Rojo peatones izquierdos
         PORTA = (1 << PA0);               // Rojo peatones derechos
-        start_delay(312);                // 10 segundos = 312 overflows @8MHz, prescaler 256
+        start_delay(1221);                // 10 segundos = 1221 overflows @8MHz, prescaler 256
 
         while (!delay_done); // Espera con interrupciones
 
@@ -110,10 +100,10 @@ void FSM(){
     break;
 
     case waiting:
-        // Vehículos en amarillo
-        PORTB = (1 << PB4) | (1 << PB6);  // Amarillo vehículo + Rojo peatones izquierdos
+        // vehiculos en amarillo
+        PORTB = (1 << PB4) | (1 << PB6);  // Amarillo vehiculo + Rojo peatones izquierdos
         PORTA = (1 << PA0);               // Rojo peatones derechos
-        start_delay(94);                 // 3 segundos = 94 overflows
+        start_delay(366);                 // 3 segundos = 366 overflows
 
         while (!delay_done);
 
@@ -122,15 +112,15 @@ void FSM(){
     break;
 
     case paso_peatones:
-        // Peatones en verde
-        PORTB = (1 << PB3);              // Rojo vehículo
+        // peatones en verde
+        PORTB = (1 << PB3);              // Rojo vehiculo
         PORTB |= (1 << PB7);             // Verde peatones izquierdos
         PORTA = (1 << PA1);              // Verde peatones derechos
-        start_delay(312);               // 10 segundos
+        start_delay(1221);               // 10 segundos
 
         while (!delay_done);
 
-        // Después del paso peatonal
+        // despues del paso peatonal
         next_state = paso_vehiculos;
         PCMSK |= (1 << PCINT1) | (1 << PCINT2);  // Reactivar interrupciones
 
@@ -142,67 +132,34 @@ void FSM(){
     break;
 
   }
-
 }
 
-void start_delay(uint16_t overflows) {
+void start_delay(uint16_t overflows){
 
   en_delay = 1;
   delay_done = 0;
   times = 0;
   target_times = overflows;
-  TIMSK |= (1 << TOIE0); // Habilitar interrupción por overflow
+  TIMSK |= (1 << TOIE0);      // Habilitar interrupcion por overflow
 
 }
 
-ISR(PCINT0_vect) {
+ISR(PCINT0_vect){
 
   if ((PINB & (1 << PB1)) || (PINB & (1 << PB2))){
     request = 1;
-    PCMSK &= ~((1 << PCINT1) | (1 << PCINT2)); // // Se desactiva la interrupción para evitar múltiples activaciones
+    PCMSK &= ~((1 << PCINT1) | (1 << PCINT2));    // Se desactiva la interrupcion para evitar multiples activaciones
   }
-
-  /*
-  // Aquí puedes manejar la interrupción de PB1 o PB2
-  // Para determinar cuál de los botones fue presionado, puedes leer el estado de los pines
-  if (PINB & (1 << PB1)) {
-      // Si PB1 está presionado, realiza lo que necesites para ese botón
-  }
-
-  if (PINB & (1 << PB2)) {
-      // Si PB2 está presionado, realiza lo que necesites para ese botón
-  }
-  */
-
 }
 
-ISR(TIMER0_OVF_vect) {
+ISR(TIMER0_OVF_vect){
 
-  if (en_delay) {
+  if (en_delay){
     times++;
-    if (times >= target_times) {
+    if (times >= target_times){
       en_delay = 0;
       delay_done = 1;
-      TIMSK &= ~(1 << TOIE0); // Desactivar solo la interrupción TOIE0
+      TIMSK &= ~(1 << TOIE0); // Desactivar solo la interrupcion TOIE0
     }
   }
-
 }
-
-/*
-#include <avr/io.h>
-#include <util/delay.h>
-
-int main(void)
-{
-  DDRB = 0x08; //Configuracion del puerto
-
-  //Parpadear
-  while (1) {
-    PORTB = 0x00; //PORTB &= ~(1 << PB3); //Esto se puede hacer tambien asi
-    _delay_ms(500); 
-    PORTB = 0x08; //PORTB |=  (1 << PB3); //Esto se puede hacer tambien asi
-    _delay_ms(500); 
-  }
-}
-*/
